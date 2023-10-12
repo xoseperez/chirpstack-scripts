@@ -1,0 +1,19 @@
+log_level: 4
+
+server:
+  host: "localhost:8080"
+  api_token: "eyJ0eX..."
+
+multiplexer:
+  #configfile: "/etc/chirpstack-packet-multiplexer/chirpstack-packet-multiplexer.toml"
+  bind: "0.0.0.0:1717"
+  backends:
+    ttn:
+      host: "eu1.cloud.thethings.network:1700"
+      uplink_only: False
+    local:
+      host: "localhost:1700"
+      uplink_only: False
+    local_uplink_only:
+      host: "localhost:1700"
+      uplink_only: True
