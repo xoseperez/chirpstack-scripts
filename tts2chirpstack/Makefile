@@ -1,3 +1,5 @@
+CONFIG ?= config.yml
+
 .venv/touchfile: requirements.txt
  	ifeq (, $(shell which virtualenv))
  		$(error "Could not find virtualenv, consider doing `pip install virtualenv`")
@@ -12,10 +14,10 @@ freeze: .venv/touchfile
 	set -e ; . .venv/bin/activate ; pip freeze
 	
 export: .venv/touchfile
-	set -e ; . .venv/bin/activate ; python exporter.py
+	set -e ; . .venv/bin/activate ; python exporter.py -c ${CONFIG}
 
 import: .venv/touchfile
-	set -e ; . .venv/bin/activate ; python importer.py
+	set -e ; . .venv/bin/activate ; python importer.py -c ${CONFIG}
 
 clean:
 	rm -rf .venv build dist *.egg-info .pytest-cache

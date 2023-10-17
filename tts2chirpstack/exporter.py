@@ -56,6 +56,7 @@ if __name__ == "__main__":
 
     # CLI arguments
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config", "-c", default="config.yml", help = "Configuration file")
     parser.add_argument("--application-id", dest="THETHINGSSTACK_APPLICATION_ID", help = "Application ID")
     parser.add_argument("--appkey", dest="THETHINGSSTACK_APPKEY", help = "App Key to login")
     parser.add_argument("--active-since", dest="THETHINGSSTACK_ACTIVE_SINCE", help = "Active in the last X seconds (also time units or fixed datetime allowed)")
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Load configuration file
-    config = Config(args=vars(args))
+    config = Config(file=args.config, args=vars(args))
 
     # Set logging level based on settings (10=DEBUG, 20=INFO, ...)
     level=config.get("logging.level", logging.DEBUG)

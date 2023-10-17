@@ -3,6 +3,7 @@ import sys
 
 import grpc
 import json
+import argparse
 from datetime import datetime
 
 from chirpstack_api import api
@@ -87,59 +88,66 @@ def get_metrics(channel, auth_token, device_id):
 # Entry point
 # -----------------------------------------------------------------------------
 
-# Hello
-print("Getting metrics from tenants, applications and devices")
+if __name__ == "__main__":
+    
+  # Hello
+  print("Getting metrics from tenants, applications and devices")
 
-# Read configuration
-config = Config()
+  # CLI arguments
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--config", "-c", default="config.yml", help = "Configuration file")
+  args = parser.parse_args()
 
-# Define the API key meta-data.
-auth_token = [("authorization", "Bearer %s" % config.get('server.api_token'))]
+  # Read configuration
+  config = Config(file=args.config)
 
-# Connect without using TLS.
-channel = grpc.insecure_channel(config.get('server.host', 'localhost:8080'))
+  # Define the API key meta-data.
+  auth_token = [("authorization", "Bearer %s" % config.get('server.api_token'))]
 
-# Current timestamp
-now = int(datetime.now().timestamp())
+  # Connect without using TLS.
+  channel = grpc.insecure_channel(config.get('server.host', 'localhost:8080'))
 
-# Header
-headers = ["timestamp", "tenant_id", "tenant_name", "application_id", "application_name", "num_devices"]
+  # Current timestamp
+  now = int(datetime.now().timestamp())
 
-# Open filename
-with open(config.get('filename', 'stats.json'), "w") as f:
+  # Header
+  headers = ["timestamp", "tenant_id", "tenant_name", "application_id", "application_name", "num_devices"]
 
-  # Start array
-  f.write('[')
+  # Open filename
+  with open(config.get('filename', 'stats.json'), "w") as f:
 
-  # Get Tenants
-  tenants = get_tenants(channel, auth_token)
+    # Start array
+    f.write('[')
 
-  # Lines
-  line = 0
+    # Get Tenants
+    tenants = get_tenants(channel, auth_token)
 
-  # Applications
-  for tenant in tenants:
-    applications = get_applications(channel, auth_token, tenant)
-    for application in applications:
-      
-      devices = get_devices(channel, auth_token, application)
-      data = [ now, tenant, tenants[tenant], application, applications[application], len(devices) ]
-      output = dict(zip(headers, data))
+    # Lines
+    line = 0
 
-      metrics = []
-      for device in devices:
-        metrics.append(get_metrics(channel, auth_token, device))
-      result = dict(functools.reduce(operator.add, map(collections.Counter, metrics)))
-      output.update(result)
-      
-      if not 0 == line:
-        f.write(',')
-      f.write('\n')
-      f.write(json.dumps(output))
+    # Applications
+    for tenant in tenants:
+      applications = get_applications(channel, auth_token, tenant)
+      for application in applications:
+        
+        devices = get_devices(channel, auth_token, application)
+        data = [ now, tenant, tenants[tenant], application, applications[application], len(devices) ]
+        output = dict(zip(headers, data))
 
-      line += 1
+        metrics = []
+        for device in devices:
+          metrics.append(get_metrics(channel, auth_token, device))
+        result = dict(functools.reduce(operator.add, map(collections.Counter, metrics)))
+        output.update(result)
+        
+        if not 0 == line:
+          f.write(',')
+        f.write('\n')
+        f.write(json.dumps(output))
 
-  # End array
-  f.write('\n]\n')
+        line += 1
+
+    # End array
+    f.write('\n]\n')
 
 

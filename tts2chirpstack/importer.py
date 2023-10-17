@@ -109,6 +109,7 @@ if __name__ == "__main__":
 
     # CLI arguments
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config", "-c", default="config.yml", help = "Configuration file")
     parser.add_argument("--server", dest="CHIRPSTACK_SERVER", help = "Chirpstack server (ip/domain and port)")
     parser.add_argument("--api-token", dest="CHIRPSTACK_API_TOKEN", help = "API token with permissions on the application")
     parser.add_argument("--application-id", dest="CHIRPSTACK_APPLICATION_ID", help = "Application EUI to save the devices to")
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Load configuration file
-    config = Config(args=vars(args))
+    config = Config(file=args.config, args=vars(args))
 
     # Set logging level based on settings (10=DEBUG, 20=INFO, ...)
     level=config.get("logging.level", logging.DEBUG)

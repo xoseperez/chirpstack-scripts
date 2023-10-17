@@ -60,7 +60,7 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   # Read configuration
-  config = Config(args.config)
+  config = Config(file=args.config)
 
   # Define the API key meta-data.
   auth_token = [("authorization", "Bearer %s" % config.get('server.api_token'))]

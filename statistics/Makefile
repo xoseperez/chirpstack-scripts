@@ -1,4 +1,4 @@
-delta ?= 0
+CONFIG ?= config.yml
 
 .venv/touchfile: requirements.txt
  	ifeq (, $(shell which virtualenv))
@@ -14,7 +14,7 @@ freeze: .venv/touchfile
 	set -e ; . .venv/bin/activate ; pip freeze
 	
 run: .venv/touchfile
-	set -e ; . .venv/bin/activate ; python statistics.py
+	set -e ; . .venv/bin/activate ; python statistics.py -c ${CONFIG}
 
 clean:
 	rm -rf .venv build dist *.egg-info .pytest-cache
