@@ -4,6 +4,7 @@ import sys
 import grpc
 import csv
 import yaml
+import argparse
 from chirpstack_api import api
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -48,48 +49,55 @@ def get_tags(client, auth_token):
 # Entry point
 # -----------------------------------------------------------------------------
 
-# Hello
-print("Creating chirpstack-packet-multiplexer config file from gateway tags")
+if __name__ == "__main__":
+    
+  # Hello
+  print("Creating chirpstack-packet-multiplexer config file from gateway tags")
 
-# Read configuration
-config = Config()
+  # CLI arguments
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--config", "-c", default="config.yml", help = "Configuration file")
+  args = parser.parse_args()
 
-# Define the API key meta-data.
-auth_token = [("authorization", "Bearer %s" % config.get('server.api_token'))]
+  # Read configuration
+  config = Config(args.config)
 
-# Connect without using TLS.
-channel = grpc.insecure_channel(config.get('server.host', 'localhost:8080'))
+  # Define the API key meta-data.
+  auth_token = [("authorization", "Bearer %s" % config.get('server.api_token'))]
 
-# Device-queue API client.
-client = api.GatewayServiceStub(channel)
+  # Connect without using TLS.
+  channel = grpc.insecure_channel(config.get('server.host', 'localhost:8080'))
 
-# Get the tags from the gateways
-tags = get_tags(client, auth_token)
+  # Device-queue API client.
+  client = api.GatewayServiceStub(channel)
 
-# Filter and transverse 'packet-multiplexer' tag
-map = {}
-for eui in tags:
-  if 'packet-multiplexer' in tags[eui]:
-    servers = tags[eui]['packet-multiplexer'].replace(',',' ')
-    for server in servers.split(' '):
-      if server != '':
-        if not server in map:
-          map[server] = []
-        map[server].append(eui)
+  # Get the tags from the gateways
+  tags = get_tags(client, auth_token)
 
-# Open file
-with open(config.get('multiplexer.configfile', 'chirpstack-packet-multiplexer.toml'), "w") as f:
+  # Filter and transverse 'packet-multiplexer' tag
+  map = {}
+  for eui in tags:
+    if 'packet-multiplexer' in tags[eui]:
+      servers = tags[eui]['packet-multiplexer'].replace(',',' ')
+      for server in servers.split(' '):
+        if server != '':
+          if not server in map:
+            map[server] = []
+          map[server].append(eui)
 
-  # Header
-  f.write("[general]\n  log_level=%d\n\n[packet_multiplexer]\n  bind=\"%s\"\n" % (
-    config.get("log_level", 4), 
-    config.get("multiplexer.bind", "0.0.0.0:1700")
-  ))
+  # Open file
+  with open(config.get('multiplexer.configfile', 'chirpstack-packet-multiplexer.toml'), "w") as f:
 
-  # Backends
-  for server in config.get('multiplexer.backends', {}).as_dict():
-    f.write("\n[[packet_multiplexer.backend]]\n  host=\"%s\"\n  uplink_only=%s\n  gateway_ids=%s\n" % (
-      config.get(f"multiplexer.backends.{server}.host"), 
-      str(config.get(f"multiplexer.backends.{server}.uplink_only", True)).lower(), 
-      str(map.get(server, [])).replace('\'', '"'))
-    )
+    # Header
+    f.write("[general]\n  log_level=%d\n\n[packet_multiplexer]\n  bind=\"%s\"\n" % (
+      config.get("log_level", 4), 
+      config.get("multiplexer.bind", "0.0.0.0:1700")
+    ))
+
+    # Backends
+    for server in config.get('multiplexer.backends', {}).as_dict():
+      f.write("\n[[packet_multiplexer.backend]]\n  host=\"%s\"\n  uplink_only=%s\n  gateway_ids=%s\n" % (
+        config.get(f"multiplexer.backends.{server}.host"), 
+        str(config.get(f"multiplexer.backends.{server}.uplink_only", True)).lower(), 
+        str(map.get(server, [])).replace('\'', '"'))
+      )
