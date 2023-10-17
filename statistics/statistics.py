@@ -64,14 +64,14 @@ def get_devices(channel, auth_token, application_id):
   devices = [ device.dev_eui for device in resp.result ]
   return devices
 
-def get_metrics(channel, auth_token, device_id):
+def get_metrics(channel, auth_token, device_id, hours=24):
 
   client = api.DeviceServiceStub(channel)
   req = api.GetDeviceLinkMetricsRequest()
   req.dev_eui = device_id
-  req.start.seconds = int(datetime.now().timestamp() - 60*60*24)
+  req.start.seconds = int(datetime.now().timestamp() - 60*60*hours)
   req.end.seconds = int(datetime.now().timestamp())
-  req.aggregation = 1 # 0: hour, 1: day, 2: month
+  req.aggregation = 0 # 0: hour, 1: day, 2: month
   try:
     resp = client.GetLinkMetrics(req, metadata=auth_token)
   except Exception as err:
@@ -134,11 +134,14 @@ if __name__ == "__main__":
         data = [ now, tenant, tenants[tenant], application, applications[application], len(devices) ]
         output = dict(zip(headers, data))
 
-        metrics = []
-        for device in devices:
-          metrics.append(get_metrics(channel, auth_token, device))
-        result = dict(functools.reduce(operator.add, map(collections.Counter, metrics)))
-        output.update(result)
+        if bool(config.get("uplinks.enabled", True)):
+          hours = int(config.get("uplinks.hours", "24"))
+          metrics = []
+          for device in devices:
+            metrics.append(get_metrics(channel, auth_token, device, hours))
+          if metrics:
+            result = dict(functools.reduce(operator.add, map(collections.Counter, metrics)))
+            output.update(result)
         
         if not 0 == line:
           f.write(',')
