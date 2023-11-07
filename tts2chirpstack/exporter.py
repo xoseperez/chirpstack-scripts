@@ -58,7 +58,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", "-c", default="config.yml", help = "Configuration file")
     parser.add_argument("--application-id", dest="THETHINGSSTACK_APPLICATION_ID", help = "Application ID")
-    parser.add_argument("--appkey", dest="THETHINGSSTACK_APPKEY", help = "App Key to login")
+    parser.add_argument("--apikey", dest="THETHINGSSTACK_APIKEY", help = "API Key to login")
     parser.add_argument("--active-since", dest="THETHINGSSTACK_ACTIVE_SINCE", help = "Active in the last X seconds (also time units or fixed datetime allowed)")
     parser.add_argument("-y", action='store_true', help = "Skip interactive promt")
     args = parser.parse_args()
@@ -71,13 +71,14 @@ if __name__ == "__main__":
     logging.basicConfig(format='[%(asctime)s] %(message)s', level=level)
     logging.info(f"{APP_NAME} {APP_VERSION}")
     logging.debug(f"Setting logging level to {level}")
+    logging.debug(f"Configuration read from '{args.config}'")
 
     # Interactive prompt
     if not args.y:
       logging.debug("Interactive prompt")
       print()
       config.set('thethingsstack.application_id', get_input("Application ID", config.get('thethingsstack.application_id')))
-      config.set('thethingsstack.appkey', get_pass("App Key to login", config.get('thethingsstack.appkey')))
+      config.set('thethingsstack.apikey', get_pass("API Key to login", config.get('thethingsstack.apikey')))
       config.set('thethingsstack.active_since', get_input("Active in the last X seconds (also time units or fixed datetime allowed)", config.get('thethingsstack.active_since')))
       print()
 
