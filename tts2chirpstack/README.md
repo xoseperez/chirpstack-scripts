@@ -1,4 +1,4 @@
-# The Things Stack (TTN/TTI) to ChirpStack Exporter
+# The Things Stack (TTN/TTI) to ChirpStack Device Exporter
 
 Two-stage script to export devices from a The Things Stack server (TTN/TTI) to a ChirpStack server. Devices are exported with root and session keys from an application in TTS to an application is ChirpStack so they will work on the new server without changes (without joining in again).
 

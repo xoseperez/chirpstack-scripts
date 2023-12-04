@@ -1,0 +1,35 @@
+logging:
+  
+  # 10: debug, 20: info, 30: warning, 40: error
+  level: 10
+
+thethingsstack:
+  
+  # Host to use, if not defined will not change the user/system defined
+  #host: "eu1.cloud.thethings.network"
+  
+  # Login using API-KEY, if not defined OAuth request will be triggered
+  #apikey: "NNSXS.DWHQF...."
+  
+chirpstack:
+
+  # Chirpstack server
+  server: "localhost:8080"
+
+  # API token with permissions on the application
+  api_token: "eyJ0eXAiOi.....rb4"
+
+  # Tenant ID to asign the new gateways to
+  tenant_id: "023fddfb-db27-xxxx-xxxx-1ef74b1e5908"
+  
+  # Tags to assign to gateways
+  tags: 
+    - packet-multiplexer: ttn local_uplink_only
+  
+# Folder used to export tiles
+export_folder: "export/"
+
+# Filename to import
+# filename: "export/gateways_20231204120000Z.csv"
+
+

@@ -7,6 +7,7 @@ This repository contains different python script related to use with ChirpStack 
 * multiplexer: creates a `chirpstack-packet-multiplexer` configuration file based on the script config file (`config.yml`) and inspecting the tags for the different gateways defined in the ChirpStack Server.
 * statistics: output statistics for all the tenants and applications in a server to a JSON file for further processing.
 * tts2chirpstack: export devices in an application in TTS (TTI/TTN) to a CSV file and later import them to a ChirpStack server using its API.
+* tts2chirpstack-gw: export gateways in TTS (TTI/TTN) to a CSV file and later import them to a ChirpStack server using its API.
 
 ## Usage
 

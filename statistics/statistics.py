@@ -127,6 +127,7 @@ if __name__ == "__main__":
 
     # Applications
     for tenant in tenants:
+      
       applications = get_applications(channel, auth_token, tenant)
       for application in applications:
         
