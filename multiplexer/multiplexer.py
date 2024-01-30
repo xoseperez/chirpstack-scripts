@@ -77,13 +77,16 @@ if __name__ == "__main__":
   # Filter and transverse 'packet-multiplexer' tag
   map = {}
   for eui in tags:
+    servers = []
     if 'packet-multiplexer' in tags[eui]:
-      servers = tags[eui]['packet-multiplexer'].replace(',',' ')
-      for server in servers.split(' '):
-        if server != '':
-          if not server in map:
-            map[server] = []
-          map[server].append(eui)
+      servers = tags[eui]['packet-multiplexer'].replace(',',' ').split()
+      servers = list(filter(None, servers))
+    if len(servers) == 0:
+      servers.append("local")
+    for server in servers:
+      if not server in map:
+        map[server] = []
+      map[server].append(eui)
 
   # Open file
   with open(config.get('multiplexer.configfile', 'chirpstack-packet-multiplexer.toml'), "w") as f:
