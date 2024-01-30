@@ -19,6 +19,9 @@ export: .venv/touchfile
 import: .venv/touchfile
 	set -e ; . .venv/bin/activate ; python importer.py -c ${CONFIG}
 
+status: .venv/touchfile
+	set -e ; . .venv/bin/activate ; python status.py -c ${CONFIG}
+
 clean:
 	rm -rf .venv build dist *.egg-info .pytest-cache
 	find -iname "*.pyc" -delete
