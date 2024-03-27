@@ -104,9 +104,9 @@ if __name__ == "__main__":
 
     # Summary
     if '0' == last_seen_after:
-        logging.info(f"Exporting all devices from {application_id}")
+        logging.info(f"Exporting all devices from TTS application '{application_id}'")
     else:
-        logging.info(f"Exporting devices from {application_id} last updated after {last_seen_after}")
+        logging.info(f"Exporting devices from TTS application '{application_id}' last updated after {last_seen_after}")
 
     # Server
     host = config.get('thethingsstack.host', False)
@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     # Open filename
     folder = config.get('export_folder', './')
-    filename = f"{folder}devices_{application_id}_{filename_datetime}_{delta}.csv"
+    filename = f"{folder}tts_devices_{application_id}_{filename_datetime}_{delta}.csv"
     with open(filename, "w") as f:
 
         # Header

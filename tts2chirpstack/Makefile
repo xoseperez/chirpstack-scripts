@@ -13,11 +13,14 @@ init: .venv/touchfile
 freeze: .venv/touchfile
 	set -e ; . .venv/bin/activate ; pip freeze
 	
-export: .venv/touchfile
-	set -e ; . .venv/bin/activate ; python exporter.py -c ${CONFIG}
+tts_export: .venv/touchfile
+	set -e ; . .venv/bin/activate ; python tts_exporter.py -c ${CONFIG}
 
-import: .venv/touchfile
-	set -e ; . .venv/bin/activate ; python importer.py -c ${CONFIG}
+cs_export: .venv/touchfile
+	set -e ; . .venv/bin/activate ; python cs_exporter.py -c ${CONFIG}
+
+cs_import: .venv/touchfile
+	set -e ; . .venv/bin/activate ; python cs_importer.py -c ${CONFIG}
 
 status: .venv/touchfile
 	set -e ; . .venv/bin/activate ; python status.py -c ${CONFIG}
@@ -27,5 +30,5 @@ clean:
 	find -iname "*.pyc" -delete
 	find -iname "__pycache__" -delete
 
-.PHONY: clean freeze export import
+.PHONY: clean freeze tts_export cs_export cs_import
 

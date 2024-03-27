@@ -18,7 +18,7 @@ The lines above will create the environment and install the required packages. T
 
 ```
 source .venv/bin/activate
-python importer.py
+python cs_importer.py
 deactivate
 ```
 
@@ -31,8 +31,8 @@ Steps to export devices from a TTS application into a ChirpStack application.
 ## Export
 
 ```
-> python exporter.py --help
-usage: exporter.py [-h] [--application-id THETHINGSSTACK_APPLICATION_ID] [--appkey THETHINGSSTACK_APPKEY] [--active-since THETHINGSSTACK_ACTIVE_SINCE] [-y]
+> python tts_exporter.py --help
+usage: tts_exporter.py [-h] [--application-id THETHINGSSTACK_APPLICATION_ID] [--appkey THETHINGSSTACK_APPKEY] [--active-since THETHINGSSTACK_ACTIVE_SINCE] [-y]
 
 options:
   -h, --help            Show this help message and exit
@@ -64,19 +64,19 @@ thethingsstack:
 This will by default export the devices in the `xp-airquality` application. You can do the same by running:
 
 ```
-python exporter.py --application-id xp-airquality
+python tts_exporter.py --application-id xp-airquality
 ```
 
 or
 
 ```
-THETHINGSSTACK_APPLICATION_ID=xp-airquality python exporter.py
+THETHINGSSTACK_APPLICATION_ID=xp-airquality python tts_exporter.py
 ```
 
 Please note the export procedure is **slow**. You can filter the devices you want to export by prividing an `active since` value to output only those devices that have reported in the last X minutes/hours. The recommended approach is to do a first export with all devices, import them and then do incremental export/imports with only the recent updated devices before enabling ChirpStack as the main server.
 
 ```
-python exporter.py --application-id xp-airquality --active-since 1h
+python tts_exporter.py --application-id xp-airquality --active-since 1h
 ```
 
 For a complete unattended export, provide a personal `apikey` with the `View devices in application` right and the run the script with the `-y` argument to skip the interactive prompt.
@@ -84,8 +84,8 @@ For a complete unattended export, provide a personal `apikey` with the `View dev
 ## Import
 
 ```
-> python importer.py -h
-usage: importer.py [-h] [--server CHIRPSTACK_SERVER] [--api-token CHIRPSTACK_API_TOKEN] [--application-id CHIRPSTACK_APPLICATION_ID] [--device-profile-id CHIRPSTACK_DEVICE_PROFILE_ID] [--filename FILENAME]
+> python cs_importer.py -h
+usage: cs_importer.py [-h] [--server CHIRPSTACK_SERVER] [--api-token CHIRPSTACK_API_TOKEN] [--application-id CHIRPSTACK_APPLICATION_ID] [--device-profile-id CHIRPSTACK_DEVICE_PROFILE_ID] [--filename FILENAME]
                    [-y]
 
 options:
