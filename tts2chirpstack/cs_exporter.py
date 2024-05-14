@@ -66,9 +66,30 @@ def get_device_activation(channel, auth_token, dev_eui):
 
   return resp.device_activation
 
+def get_device_link_metrics(channel, auth_token, dev_eui, days=7):
+
+  now = datetime.utcnow()
+  start_dt = (now - timedelta(days=days)).strftime('%Y-%m-%dT%H:%M:%SZ')
+  end_dt = now.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+  client = api.DeviceServiceStub(channel)
+  req = api.GetDeviceLinkMetricsRequest()
+  req.dev_eui = dev_eui
+  req.start.FromDatetime(now - timedelta(days=days))
+  req.end.FromDatetime(now)
+  req.aggregation = 1 # days
+
+  try:
+    resp = client.GetLinkMetrics(req, metadata=auth_token)
+  except Exception as err:
+    print(f"Error getting the activation keys for device {dev_eui} ({str(err)})")
+    return {}
+
+  return resp
+
 # -----------------------------------------------------------------------------
 
-def row_to_csv(device, keys, activation):
+def row_to_csv(device, keys, activation, metrics, days = 7):
 
     fields = []
     fields.append(device.name)
@@ -86,6 +107,10 @@ def row_to_csv(device, keys, activation):
     fields.append(str(activation.f_cnt_up))
     fields.append(str(activation.n_f_cnt_down))
     fields.append(str(activation.a_f_cnt_down))
+    fields.append(str(device.last_seen_at.seconds))
+    
+    for i in range(days):
+      fields.append(str(int(metrics.rx_packets.datasets[0].data[i])))
 
     return ','.join(fields)
 
@@ -154,7 +179,7 @@ if __name__ == "__main__":
     with open(filename, "w") as f:
 
         # Header
-        f.write("device_id description dev_eui join_eui app_key dev_addr app_s_key nwk_s_enc_key s_nwk_s_int_key f_nwk_s_int_key f_cnt_up n_f_cnt_down a_f_cnt_down\n".replace(' ',','))
+        f.write("device_id description dev_eui join_eui app_key dev_addr app_s_key nwk_s_enc_key s_nwk_s_int_key f_nwk_s_int_key f_cnt_up n_f_cnt_down a_f_cnt_down last_seen_at 7 6 5 4 3 2 1\n".replace(' ',','))
 
         # Walk devices
         processed=0
@@ -163,7 +188,8 @@ if __name__ == "__main__":
             try:
                 keys = get_device_keys(channel, auth_token, device.dev_eui)
                 activation = get_device_activation(channel, auth_token, device.dev_eui)
-                f.write(row_to_csv(device, keys, activation) + "\n")
+                metrics = get_device_link_metrics(channel, auth_token, device.dev_eui, 7)
+                f.write(row_to_csv(device, keys, activation, metrics, 7) + "\n")
                 f.flush()
                 processed += 1
             except Exception as e:
