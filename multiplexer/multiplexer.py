@@ -74,19 +74,22 @@ if __name__ == "__main__":
   # Get the tags from the gateways
   tags = get_tags(client, auth_token)
 
+  # Get default backends
+  default_backends = config.get('multiplexer.default_backends', 'local').replace(',',' ').split()
+
   # Filter and transverse 'packet-multiplexer' tag
   map = {}
   for eui in tags:
-    servers = []
+    backends = []
     if 'packet-multiplexer' in tags[eui]:
-      servers = tags[eui]['packet-multiplexer'].replace(',',' ').split()
-      servers = list(filter(None, servers))
-    if len(servers) == 0:
-      servers.append("local")
-    for server in servers:
-      if not server in map:
-        map[server] = []
-      map[server].append(eui)
+      backends = tags[eui]['packet-multiplexer'].replace(',',' ').split()
+      backends = list(filter(None, backends))
+    if len(backends) == 0:
+      backends = default_backends
+    for backend in backends:
+      if not backend in map:
+        map[backend] = []
+      map[backend].append(eui)
 
   # Open file
   with open(config.get('multiplexer.configfile', 'chirpstack-packet-multiplexer.toml'), "w") as f:
@@ -98,9 +101,9 @@ if __name__ == "__main__":
     ))
 
     # Backends
-    for server in config.get('multiplexer.backends', {}).as_dict():
+    for backend in config.get('multiplexer.backends', {}).as_dict():
       f.write("\n[[packet_multiplexer.backend]]\n  host=\"%s\"\n  uplink_only=%s\n  gateway_ids=%s\n" % (
-        config.get(f"multiplexer.backends.{server}.host"), 
-        str(config.get(f"multiplexer.backends.{server}.uplink_only", True)).lower(), 
-        str(map.get(server, [])).replace('\'', '"'))
+        config.get(f"multiplexer.backends.{backend}.host"), 
+        str(config.get(f"multiplexer.backends.{backend}.uplink_only", True)).lower(), 
+        str(map.get(backend, [])).replace('\'', '"'))
       )

@@ -7,10 +7,14 @@ server:
 multiplexer:
   #configfile: "/etc/chirpstack-packet-multiplexer/chirpstack-packet-multiplexer.toml"
   bind: "0.0.0.0:1717"
+  default_backends: "local"
   backends:
     ttn:
       host: "eu1.cloud.thethings.network:1700"
       uplink_only: False
+    ttn_uplink_only:
+      host: "eu1.cloud.thethings.network:1700"
+      uplink_only: True
     local:
       host: "localhost:1700"
       uplink_only: False
