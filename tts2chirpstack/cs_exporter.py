@@ -40,6 +40,19 @@ def get_devices(channel, auth_token, application_id):
 
   return resp.result
 
+def get_device_join_eui(dev_eui):
+
+  client = api.DeviceServiceStub(channel)
+  req = api.GetDeviceRequest()
+  req.dev_eui = dev_eui
+  try:
+    resp = client.Get(req, metadata=auth_token)
+  except Exception as err:
+    print(f"Error getting the join_eui for device {dev_eui} ({str(err)})")
+    return {}
+
+  return resp.device.join_eui
+
 def get_device_keys(channel, auth_token, dev_eui):
 
   client = api.DeviceServiceStub(channel)
@@ -89,15 +102,13 @@ def get_device_link_metrics(channel, auth_token, dev_eui, days=7):
 
 # -----------------------------------------------------------------------------
 
-def row_to_csv(device, keys, activation, metrics, days = 7):
+def row_to_csv(device, join_eui, keys, activation, metrics, days = 7):
 
     fields = []
     fields.append(device.name)
     fields.append(device.description)
     fields.append(device.dev_eui)
-    #fields.append(device.device_profile_id)
-    #fields.append(device.device_profile_name)
-    fields.append("")
+    fields.append(join_eui)
     fields.append(keys.nwk_key) # nwk_key is actually the application key
     fields.append(activation.dev_addr)
     fields.append(activation.app_s_key)
@@ -131,6 +142,7 @@ if __name__ == "__main__":
     parser.add_argument("--server", dest="CHIRPSTACK_SERVER", help = "Chirpstack server (ip/domain and port)")
     parser.add_argument("--api-token", dest="CHIRPSTACK_API_TOKEN", help = "API token with permissions on the application")
     parser.add_argument("--application-id", dest="CHIRPSTACK_APPLICATION_ID", help = "Application EUI to monitor the devices")
+    parser.add_argument("--stats-days", default=11, dest="CHIRPSTACK_STATS_DAYS", help = "Gather stats for the last N days")
     parser.add_argument("-y", action='store_true', help = "Skip interactive promt")
     args = parser.parse_args()
 
@@ -150,6 +162,7 @@ if __name__ == "__main__":
       config.set('chirpstack.server', get_input("Chirpstack server (ip/domain and port)", config.get('chirpstack.server')))
       config.set('chirpstack.api_token', get_pass("API token with permissions on the application", config.get('chirpstack.api_token')))
       config.set('chirpstack.application_id', get_input("Application EUI to monitor the devices", config.get('chirpstack.application_id')))
+      config.set('chirpstack.stats_days', get_input("Gather stats for the last N days", config.get('chirpstack.stats_days')))
       print()
 
     # Some variables and checks
@@ -186,10 +199,11 @@ if __name__ == "__main__":
         for device in devices:
 
             try:
+                join_eui= get_device_join_eui(device.dev_eui)
                 keys = get_device_keys(channel, auth_token, device.dev_eui)
                 activation = get_device_activation(channel, auth_token, device.dev_eui)
                 metrics = get_device_link_metrics(channel, auth_token, device.dev_eui, 7)
-                f.write(row_to_csv(device, keys, activation, metrics, 7) + "\n")
+                f.write(row_to_csv(device, join_eui, keys, activation, metrics, 7) + "\n")
                 f.flush()
                 processed += 1
             except Exception as e:
